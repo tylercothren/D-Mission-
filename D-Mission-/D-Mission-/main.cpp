@@ -37,12 +37,12 @@ public:
 
 	Line()
 	{ 
-		curve = x = y = z = 0;
+		scale = curve = clip = x = y = z = X = Y = W = 0;
 		object = Textures::Empty;
 	}
 
 	//From world to screen coordinates
-	void project(int camX, int camY, int camZ)
+	void project(float camX, float camY, float camZ)
 	{
 		scale = camD / (z - camZ);
 		X = (1 + scale * (x - camX)) * width / 2;
@@ -57,8 +57,8 @@ public:
 		Sprite sprite;
 		sprite.setTexture(textures[object]);
 
-		int textureWidth = sprite.getTextureRect().width;
-		int textureHeight = sprite.getTextureRect().height;
+		float textureWidth = sprite.getTextureRect().width;
+		float textureHeight = sprite.getTextureRect().height;
 
 		float resultSpriteX = 0.0f;
 		float resultSpriteY = 0.0f;
@@ -71,7 +71,7 @@ public:
 		resultSpriteWidth = textureWidth * W / 266; // Texture's Width * Line's Width / 266 
 		resultSpriteHeight = textureHeight * W / 266; // Texture's Height * Line's Width / 266 
 
-		resultSpriteX += resultSpriteHeight * objectX; // Offset X
+		resultSpriteX += objectX; // Offset X
 		resultSpriteY += resultSpriteHeight * (-1); // Offset Y
 
 		float clipH = resultSpriteY + resultSpriteHeight - clip;
@@ -125,31 +125,25 @@ int main()
 	background.setTexture(&textures[Textures::BackGround]);
 
 	//Create Track in Memeory
-	std::vector<Line *> lines(1600);
+	std::vector<Line> lines(1600);
 
 	//// Track Plan ////
 	for (int i = 0; i < 1600; i++)
 	{
-		Line *line = new Line;
-		line->z = i*segL;
+		Line line;
+		line.z = i*segL;
 
 		//// Curve Example at Track Position
-		if (i > 300 && i < 700) line->curve = 2;
+		if (i > 300 && i < 700) line.curve = 2;
 
 		//// Elevation Change Example
-		if (i > 750) line->y = sin(i / 30.0) * 1500;
+		if (i > 750) line.y = sin(i / 30.0) * 1500;
 
 		//// Add Trees
 		if (i % 50 == 0)
 		{
-			line->object = Textures::Tree1;
-			line->objectX = 0.0;
-		}
-
-		if (i % 53 == 0)
-		{
-			line->object = Textures::Tree1;
-			line->objectX = -300.0;
+			line.object = Textures::Tree1;
+			line.objectX = 0.0;
 		}
 
 		lines[i] = line;
@@ -157,7 +151,7 @@ int main()
 
 	int N = lines.size();
 	int pos = 200;
-	int playerX = 0;
+	float playerX = 0;
 
 	//// Start Race ////
 
@@ -181,9 +175,9 @@ int main()
 
 		app.clear();
 		int startPos = pos / segL;
-		int camH = 1500 + lines[startPos]->y;
+		float camH = 1500 + lines[startPos].y;
 		float x = 0, dx = 0;
-		int maxY = height;
+		float maxY = height;
 
 		//// Draw Background ////
 		background.setPosition(-128.0f + (playerX * -.006), -300.0f + (camH * .008)); //Background moves with camera
@@ -192,31 +186,31 @@ int main()
 		//// Draw Road to Horizon Line ////
 		for (int n = startPos; n <= startPos + 300; n++)
 		{
-			Line *l = lines[n%N];
-			l->project(playerX - x, camH, pos - (n >= N ? N * segL : 0));
+			Line &l = lines[n%N];
+			l.project(playerX - x, camH, pos - (n >= N ? N * segL : 0));
 			x += dx;
-			dx += l->curve;
+			dx += l.curve;
 
-			l->clip = maxY;
-			if (l->Y >= maxY) continue;
-			maxY = l->Y;
+			l.clip = maxY;
+			if (l.Y >= maxY) continue;
+			maxY = l.Y;
 
 			Color grass = (n / 3) % 2 ? Color(0, 77, 0) : Color(0, 102, 0);
 			Color rumble = (n / 3) % 2 ? Color(255, 255, 255) : Color(153, 0, 0);
 			Color road = (n / 3) % 2 ? Color(107, 107, 107) : Color(105, 105, 105);
 
-			Line *p = lines[(n - 1) % N]; //previous line
+			Line p = lines[(n - 1) % N]; //previous line
 
-			drawQuad(app, grass, 0, p->Y, width, 0, l->Y, width);
-			drawQuad(app, rumble, p->X, p->Y, p->W*1.15, l->X, l->Y, l->W*1.15);
-			drawQuad(app, road, p->X, p->Y, p->W, l->X, l->Y, l->W);
+			drawQuad(app, grass,  0,   p.Y, width,      0,   l.Y, width);
+			drawQuad(app, rumble, p.X, p.Y, p.W * 1.15, l.X, l.Y, l.W*1.15);
+			drawQuad(app, road,   p.X, p.Y, p.W,        l.X, l.Y, l.W);
 		}
 
 		//// Draw Objects from Horizon line to Player ////
 		for (int n = startPos + 300; n >= startPos; n--)
 		{
-			Line *l = lines[n%N];
-			l->drawLineObjects(app);
+			Line &l = lines[n%N];
+			l.drawLineObjects(app);
 		}
 		app.display();
 	}
