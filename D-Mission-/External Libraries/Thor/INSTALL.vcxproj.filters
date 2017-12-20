@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\Thor\CMakeFiles\3e103cb72dff68faa62048b7f50cbc84\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{6D060322-B700-39F4-AC44-432FBDA1EF82}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

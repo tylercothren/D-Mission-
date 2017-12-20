@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5F65B034-B7E5-3842-91AF-33B87E3B2FBC}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>thor</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\Thor\src\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">thor.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">thor-d</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\Thor\src\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">thor.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">thor</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\tylerc\source\repos\Thor\include;C:\Users\tylerc\source\repos\Thor\extlibs\aurora\include;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Debug/</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;THOR_EXPORTS;CMAKE_INTDIR="Debug";thor_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;THOR_EXPORTS;CMAKE_INTDIR=\"Debug\";thor_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\tylerc\source\repos\Thor\include;C:\Users\tylerc\source\repos\Thor\extlibs\aurora\include;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\tylerc\source\repos\Thor\include;C:\Users\tylerc\source\repos\Thor\extlibs\aurora\include;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\lib\sfml-audio-d.lib;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\lib\sfml-graphics-d.lib;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\lib\sfml-window-d.lib;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\lib\sfml-system-d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/tylerc/source/repos/D-Mission-/D-Mission-/External Libraries/Thor/src/Debug/thor-d.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/tylerc/source/repos/D-Mission-/D-Mission-/External Libraries/Thor/src/Debug/thor-d.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\tylerc\source\repos\Thor\include;C:\Users\tylerc\source\repos\Thor\extlibs\aurora\include;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Release/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;THOR_EXPORTS;CMAKE_INTDIR="Release";thor_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat></DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;THOR_EXPORTS;CMAKE_INTDIR=\"Release\";thor_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\tylerc\source\repos\Thor\include;C:\Users\tylerc\source\repos\Thor\extlibs\aurora\include;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\tylerc\source\repos\Thor\include;C:\Users\tylerc\source\repos\Thor\extlibs\aurora\include;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\lib\sfml-audio.lib;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\lib\sfml-graphics.lib;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\lib\sfml-window.lib;C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\SFML\lib\sfml-system.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/tylerc/source/repos/D-Mission-/D-Mission-/External Libraries/Thor/src/Release/thor.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/tylerc/source/repos/D-Mission-/D-Mission-/External Libraries/Thor/src/Release/thor.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\tylerc\source\repos\Thor\src\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building Custom Rule C:/Users/tylerc/source/repos/Thor/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -HC:/Users/tylerc/source/repos/Thor "-BC:/Users/tylerc/source/repos/D-Mission-/D-Mission-/External Libraries/Thor" --check-stamp-file "C:/Users/tylerc/source/repos/D-Mission-/D-Mission-/External Libraries/Thor/src/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:/Users/tylerc/source/repos/Thor/src/CMakeLists.txt;C:\Users\tylerc\source\repos\Thor\src\CMakeLists.txt;C:\Users\tylerc\source\repos\Thor\src\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\Thor\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building Custom Rule C:/Users/tylerc/source/repos/Thor/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -HC:/Users/tylerc/source/repos/Thor "-BC:/Users/tylerc/source/repos/D-Mission-/D-Mission-/External Libraries/Thor" --check-stamp-file "C:/Users/tylerc/source/repos/D-Mission-/D-Mission-/External Libraries/Thor/src/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:/Users/tylerc/source/repos/Thor/src/CMakeLists.txt;C:\Users\tylerc\source\repos\Thor\src\CMakeLists.txt;C:\Users\tylerc\source\repos\Thor\src\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\Thor\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Action.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\ActionOperations.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Affectors.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Arrow.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\BigSprite.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\BigTexture.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\CallbackTimer.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\ColorAnimation.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\ColorGradient.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\ConcaveShape.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Connection.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Distributions.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Emitters.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\FadeAnimation.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\FrameAnimation.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\InputNames.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Joystick.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Particle.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\ParticleSystem.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Random.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Shapes.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\StopWatch.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Timer.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\ToString.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Triangulation.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\Trigonometry.cpp"  />
+    <ClCompile Include="C:\Users\tylerc\source\repos\Thor\src\UniformAccess.cpp"  />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\tylerc\source\repos\D-Mission-\D-Mission-\External Libraries\Thor\ZERO_CHECK.vcxproj">
+      <Project>{1CF753A0-3E40-3CE9-B16F-B02F2555A698}</Project>
+      <Name>ZERO_CHECK</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

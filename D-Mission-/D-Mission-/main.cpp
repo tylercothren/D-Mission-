@@ -1,5 +1,9 @@
 #include <SFML\Graphics.hpp>
+#include <Thor\Resources.hpp>
+#include <iostream>
+
 using namespace sf;
+using namespace thor;
 
 float width = 1024.0;
 float height = 768.0;
@@ -7,46 +11,79 @@ int roadW = 2000;
 int segL = 200; // Segment Length
 float camD = 0.84; // Camera Depth
 
-struct Line
+namespace Textures
 {
+	enum Type
+	{
+		Tree1,
+		Tree2,
+		Billboard1,
+		BackGround,
+		_180SX,
+		Empty
+	};
+}
+
+thor::ResourceHolder<sf::Texture, Textures::Type> textures; //All Textures Holder
+
+class Line
+{
+public:
 	float x, y, z; //3D Center of Line
 	float X, Y, W; //screen coord
-	float scale, curve, spriteX, clip;
-	Sprite sprite;
+	float scale, curve, clip;
+	Textures::Type object;
+	float objectX;
 
-	Line() { curve = x = y = z = 0; }
+	Line()
+	{ 
+		curve = x = y = z = 0;
+		object = Textures::Empty;
+	}
 
 	//From world to screen coordinates
-	void project(int camX, int camY, int camZ) 
+	void project(int camX, int camY, int camZ)
 	{
 		scale = camD / (z - camZ);
-		X = (1 + scale*(x - camX)) * width / 2;
-		Y = (1 - scale*(y - camY)) * height / 2;
+		X = (1 + scale * (x - camX)) * width / 2;
+		Y = (1 - scale * (y - camY)) * height / 2;
 		W = scale * roadW * width / 2;
 	}
 
-	void drawSprite(RenderWindow &app)
+	void drawLineObjects(RenderWindow &app)
 	{
-		Sprite s = sprite;
-		int w = s.getTextureRect().width;
-		int h = s.getTextureRect().height;
+		if (object == Textures::Empty) return;
 
-		float destX = X + scale * spriteX * width / 2;
-		float destY = Y + 4;
-		float destW = w * W / 266;
-		float destH = h * W / 266;
+		Sprite sprite;
+		sprite.setTexture(textures[object]);
 
-		destX += destW * spriteX;
-		destY += destH * (-1);
+		int textureWidth = sprite.getTextureRect().width;
+		int textureHeight = sprite.getTextureRect().height;
 
-		float clipH = destY + destH - clip;
+		float resultSpriteX = 0.0f;
+		float resultSpriteY = 0.0f;
+		float resultSpriteWidth = 0.0f;
+		float resultSpriteHeight = 0.0f;
+
+		//Sprite Size and Position Logic
+		resultSpriteX = X + (scale * objectX * width / 2); // Line's X + ( Line's Scale * Object's X Offset * Screen Width / 2)
+		resultSpriteY = Y + 4; // Line's Y + 4 (So it appears in middle of line?)
+		resultSpriteWidth = textureWidth * W / 266; // Texture's Width * Line's Width / 266 
+		resultSpriteHeight = textureHeight * W / 266; // Texture's Height * Line's Width / 266 
+
+		resultSpriteX += resultSpriteHeight * objectX; // Offset X
+		resultSpriteY += resultSpriteHeight * (-1); // Offset Y
+
+		float clipH = resultSpriteY + resultSpriteHeight - clip;
 		if (clipH < 0) clipH = 0;
+		if (clipH >= resultSpriteHeight) return;
 
-		if (clipH >= destH) return;
-		s.setTextureRect(IntRect(0, 0, w, (h - h) * (clipH / destH)));
-		s.setScale(destW / w, destH / h);
-		s.setPosition(destX, destY);
-		app.draw(s);
+		//Set Sprite Size in relation to Line distance
+		sprite.setTextureRect(IntRect(0, 0, textureWidth, (textureHeight - (textureHeight * clipH / resultSpriteHeight))));
+		sprite.setScale(resultSpriteWidth / textureWidth, resultSpriteHeight / textureHeight);
+		sprite.setPosition(resultSpriteX, resultSpriteY);
+
+		app.draw(sprite);
 	}
 };
 
@@ -63,47 +100,66 @@ void drawQuad(RenderWindow &w, Color c, float x1, float y1, float w1, float x2, 
 
 int main()
 {
+	//// Create Application Window ////
 	RenderWindow app(VideoMode(width, height), "D-Mission!");
 	app.setFramerateLimit(60);
 
+	//// Intro and Splash View ////
+
+	//// Main Menu ////
+
+	//// Load Race ////
+
+	try
+	{
+		textures.acquire(Textures::Tree1, thor::Resources::fromFile<sf::Texture>("tree1.png"));
+		textures.acquire(Textures::BackGround, thor::Resources::fromFile<sf::Texture>("bg.jpg"));
+	}
+	catch (thor::ResourceLoadingException& e)
+	{
+		std::cout << e.what() << std::endl;
+		return 1;
+	}
+
 	RectangleShape background(Vector2f(width*1.25, height));
-	Texture bg;
-	bg.loadFromFile("bg.jpg");
-	bg.setRepeated(true);
-	background.setTexture(&bg);
+	background.setTexture(&textures[Textures::BackGround]);
 
-	Texture t;
-	t.loadFromFile("tree1.png");
-	t.setSmooth(true);
-	Sprite sTree;
-	sTree.setTexture(t);
-
-	std::vector<Line> lines;
+	//Create Track in Memeory
+	std::vector<Line *> lines(1600);
 
 	//// Track Plan ////
 	for (int i = 0; i < 1600; i++)
 	{
-		Line line;
-		line.z = i*segL;
+		Line *line = new Line;
+		line->z = i*segL;
 
 		//// Curve Example at Track Position
-		if (i < 300 && i < 700) line.curve = 2;
+		if (i > 300 && i < 700) line->curve = 2;
 
-		//// Elevation Change Example at Track Position
-		if (i > 300) line.y = sin(i / 30.0) * 1500;
+		//// Elevation Change Example
+		if (i > 750) line->y = sin(i / 30.0) * 1500;
 
-		if (i % 2 == 0) 
+		//// Add Trees
+		if (i % 50 == 0)
 		{
-			line.spriteX = -2.5;
-			line.sprite = &sTree;
+			line->object = Textures::Tree1;
+			line->objectX = 0.0;
 		}
 
-		lines.push_back(line);
+		if (i % 53 == 0)
+		{
+			line->object = Textures::Tree1;
+			line->objectX = -300.0;
+		}
+
+		lines[i] = line;
 	}
 
 	int N = lines.size();
 	int pos = 200;
 	int playerX = 0;
+
+	//// Start Race ////
 
 	while (app.isOpen())
 	{
@@ -119,48 +175,49 @@ int main()
 		if (Keyboard::isKeyPressed(Keyboard::Up)) pos += 200;
 		if (Keyboard::isKeyPressed(Keyboard::Down)) pos -= 200;
 
-		//Infinite track
-		while (pos >= N*segL) pos -= N*segL;
-		while (pos < 0) pos += N*segL;
+		//Circular track
+		while (pos >= N * segL) pos -= N * segL;
+		while (pos < 0) pos += N * segL;
 
 		app.clear();
 		int startPos = pos / segL;
-		int camH = 1500 + lines[startPos].y;
+		int camH = 1500 + lines[startPos]->y;
 		float x = 0, dx = 0;
 		int maxY = height;
 
 		//// Draw Background ////
-		background.setPosition(-128.0f + (playerX * -.006), -300.0f + (camH * .01)); //Background moves with camera
+		background.setPosition(-128.0f + (playerX * -.006), -300.0f + (camH * .008)); //Background moves with camera
 		app.draw(background);
 
-		//// Draw Road to Horizon Line////
-		for (int n = startPos; n <= startPos+300; n++) 
+		//// Draw Road to Horizon Line ////
+		for (int n = startPos; n <= startPos + 300; n++)
 		{
-			Line &l = lines[n%N];
-			l.project(playerX - x, camH, pos - (n >= N?N*segL:0));
+			Line *l = lines[n%N];
+			l->project(playerX - x, camH, pos - (n >= N ? N * segL : 0));
 			x += dx;
-			dx += l.curve;
+			dx += l->curve;
 
-			if (l.Y >= maxY) continue;
-			maxY = l.Y;
+			l->clip = maxY;
+			if (l->Y >= maxY) continue;
+			maxY = l->Y;
 
-			Color grass = (n / 3) % 2 ? Color(16, 200, 16) : Color(0, 154, 0);
-			Color rumble = (n / 3) % 2 ? Color(255, 255, 255) : Color(0, 0, 0);
+			Color grass = (n / 3) % 2 ? Color(0, 77, 0) : Color(0, 102, 0);
+			Color rumble = (n / 3) % 2 ? Color(255, 255, 255) : Color(153, 0, 0);
 			Color road = (n / 3) % 2 ? Color(107, 107, 107) : Color(105, 105, 105);
 
-			Line p = lines[(n - 1)% N]; //previous line
+			Line *p = lines[(n - 1) % N]; //previous line
 
-			drawQuad(app, grass, 0, p.Y, width, 0, l.Y, width);
-			drawQuad(app, rumble, p.X, p.Y, p.W*1.2, l.X, l.Y, l.W*1.2);
-			drawQuad(app, road, p.X, p.Y, p.W, l.X, l.Y, l.W);
+			drawQuad(app, grass, 0, p->Y, width, 0, l->Y, width);
+			drawQuad(app, rumble, p->X, p->Y, p->W*1.15, l->X, l->Y, l->W*1.15);
+			drawQuad(app, road, p->X, p->Y, p->W, l->X, l->Y, l->W);
 		}
 
-		//// Draw Objects ////
-		for (int n = startPos + 300; n > startPos; n--) 
+		//// Draw Objects from Horizon line to Player ////
+		for (int n = startPos + 300; n >= startPos; n--)
 		{
-			lines[n%N].drawSprite(app);
+			Line *l = lines[n%N];
+			l->drawLineObjects(app);
 		}
-
 		app.display();
 	}
 
