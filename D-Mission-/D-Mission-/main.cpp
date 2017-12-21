@@ -12,7 +12,6 @@ int viewDistance = 300;
 float horizonLine = height / 2;
 float centerLine = width / 2;
 float maxZ = viewDistance * segL;
-Texture textures[2];
 std::vector<sf::Sprite> objects;
 
 void drawQuad(RenderWindow &w, Color c, int x1, int y1, int w1, int x2, int y2, int w2)
@@ -25,6 +24,24 @@ void drawQuad(RenderWindow &w, Color c, int x1, int y1, int w1, int x2, int y2, 
 	shape.setPoint(3, Vector2f(x1 + w1, y1));
 	w.draw(shape);
 }
+
+struct Car
+{
+	enum CarState
+	{
+		Neutral,
+		TurnLeft,
+		TurnRight
+	};
+	CarState state;
+	float x, y;
+	Car() 
+	{
+		state = Neutral;
+		x = 0;
+		y = 0;
+	}
+};
 
 struct Line
 {
@@ -77,6 +94,8 @@ int main()
 	RenderWindow app(VideoMode(width, height), "D-Mission!");
 	app.setFramerateLimit(60);
 
+	Texture textures[5];
+
 	textures[0].loadFromFile("Assets/tree1.png");
 	textures[0].setSmooth(true);
 	objects.push_back(sf::Sprite(textures[0]));
@@ -84,6 +103,18 @@ int main()
 	textures[1].loadFromFile("Assets/house1.png");
 	textures[1].setSmooth(true);
 	objects.push_back(sf::Sprite(textures[1]));
+
+	textures[2].loadFromFile("Assets/180sx_neutral.png");
+	textures[2].setSmooth(true);
+	objects.push_back(sf::Sprite(textures[2]));
+
+	textures[3].loadFromFile("Assets/180sx_turnLeft.png");
+	textures[3].setSmooth(true);
+	objects.push_back(sf::Sprite(textures[3]));
+
+	textures[4].loadFromFile("Assets/180sx_turnRight.png");
+	textures[4].setSmooth(true);
+	objects.push_back(sf::Sprite(textures[4]));
 
 	Texture bg;
 	bg.loadFromFile("Assets/bg.jpg");
@@ -93,6 +124,8 @@ int main()
 	sBackground.setPosition(-2000, 0);
 
 	std::vector<Line> lines;
+
+	Car car = Car();
 
 	for (int i = 0; i<1600; i++)
 	{
@@ -135,9 +168,18 @@ int main()
 		}
 
 		int speed = 0;
+		car.state = Car::Neutral;
 
-		if (Keyboard::isKeyPressed(Keyboard::Right)) playerX += 0.1;
-		if (Keyboard::isKeyPressed(Keyboard::Left)) playerX -= 0.1;
+		if (Keyboard::isKeyPressed(Keyboard::Right)) 
+		{
+			playerX += 0.1;
+			car.state = Car::TurnRight;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Left))
+		{
+			playerX -= 0.1;
+			car.state = Car::TurnLeft;
+		}
 		if (Keyboard::isKeyPressed(Keyboard::Up)) speed = 200;
 		if (Keyboard::isKeyPressed(Keyboard::Down)) speed = -200;
 		if (Keyboard::isKeyPressed(Keyboard::Tab)) speed *= 3;
@@ -148,7 +190,7 @@ int main()
 		while (pos >= N*segL) pos -= N*segL;
 		while (pos < 0) pos += N*segL;
 
-		app.clear(Color(105, 205, 4));
+		app.clear();
 		app.draw(sBackground);
 
 		int startPos = pos / segL;
@@ -187,6 +229,27 @@ int main()
 		{
 			lines[n%N].drawSprite(app);
 		}
+
+		//// Draw Car ////
+		if (car.state == Car::TurnRight)
+		{
+			objects[4].setScale(.3, .3);
+			objects[4].setPosition(centerLine - (objects[3].getTextureRect().width / 2 * .3), horizonLine + 100);
+			app.draw(objects[4]);
+		}
+		else if (car.state == Car::TurnLeft)
+		{
+			objects[3].setScale(.3, .3);
+			objects[3].setPosition(centerLine - (objects[3].getTextureRect().width / 2 * .3), horizonLine + 100);
+			app.draw(objects[3]);
+		}
+		else if(car.state == Car::Neutral)
+		{
+			objects[2].setScale(.3, .3);
+			objects[2].setPosition(centerLine - (objects[2].getTextureRect().width / 2 * .3), horizonLine + 100);
+			app.draw(objects[2]);
+		}
+
 		app.display();
 	}
 	return 0;
