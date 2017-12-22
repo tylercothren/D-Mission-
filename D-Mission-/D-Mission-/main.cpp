@@ -166,6 +166,8 @@ int main()
 
 		//// Reset Car ////
 		playerCar.clutch = false;
+		playerCar.rpm =- 20;
+		limit(playerCar.rpm, playerCar.redline, 0);
 		playerCar.speed = accelerate(playerCar.speed, decel, 1);
 		playerCar.carState = Car::Neutral;
 
@@ -182,9 +184,9 @@ int main()
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Up))
 		{
+			playerCar.rpm += playerCar.rpm_dx;
 			if (playerCar.clutch == false) // Only Engine Revs when clutch is disengaged
 				playerCar.speed = accelerate(playerCar.speed, playerCar.acceleration, 1);
-			playerCar.rpm += playerCar.rpm_dx;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Down))
 		{
@@ -193,24 +195,74 @@ int main()
 		if (Keyboard::isKeyPressed(Keyboard::Tab)) playerCar.speed *= 3;
 		if (Keyboard::isKeyPressed(Keyboard::W)) H += 100; // Hax
 		if (Keyboard::isKeyPressed(Keyboard::S)) H -= 100; // Hax
-
-		//// Shifting ////
-		if (Keyboard::isKeyPressed(Keyboard::Q) == true && playerCar.clutch == true)
+		if (Keyboard::isKeyPressed(Keyboard::E))
+		{
+			if (playerCar.currentGear == 0)
+				playerCar.Shift(0, 0);
+			else if (playerCar.currentGear == 1)
+				playerCar.Shift(1, 0);
+			else if (playerCar.currentGear == 2)
+				playerCar.Shift(2, 0);
+			else if (playerCar.currentGear == 3)
+				playerCar.Shift(3, 0);
+			else if (playerCar.currentGear == 4)
+				playerCar.Shift(4, 0);
+			else if (playerCar.currentGear == 5)
+				playerCar.Shift(5, 0);
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Num1) == true && playerCar.clutch == true)
+		{
+			if (playerCar.currentGear == 0)
+				playerCar.Shift(0, 1);
+			else if(playerCar.currentGear == 2)
+				playerCar.Shift(2, 1);
+			else if (playerCar.currentGear == 3)
+				playerCar.Shift(3, 1);
+			else
+				playerCar.engineState = Car::Stalled;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Num2) == true && playerCar.clutch == true)
 		{
 			if (playerCar.rpm >= 1000 && playerCar.currentGear == 1)
 				playerCar.Shift(1, 2);
+			else if (playerCar.currentGear == 3)
+				playerCar.Shift(3, 2);
+			else if (playerCar.rpm >= 2000 && playerCar.currentGear == 0)
+				playerCar.Shift(0, 2);
 			else
 				playerCar.engineState = Car::Stalled;
 		}
-
-		if (Keyboard::isKeyPressed(Keyboard::W) == true && playerCar.clutch == true)
+		if (Keyboard::isKeyPressed(Keyboard::Num3) == true && playerCar.clutch == true)
 		{
-			if (playerCar.rpm >= 1000 && playerCar.currentGear == 2)
+			if (playerCar.rpm >= 2000 && playerCar.currentGear == 2)
 				playerCar.Shift(2, 3);
+			else if (playerCar.rpm >= 3000 && playerCar.currentGear == 0)
+				playerCar.Shift(0, 3);
+			else if (playerCar.rpm >= 2000 && playerCar.currentGear == 1)
+				playerCar.Shift(1, 3);
+			else if (playerCar.currentGear == 4)
+				playerCar.Shift(4, 3);
+			else
+				playerCar.engineState = Car::Stalled;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Num4) == true && playerCar.clutch == true)
+		{
+			if (playerCar.rpm >= 5000 && playerCar.currentGear == 3)
+				playerCar.Shift(3, 4);
+			else if (playerCar.currentGear == 5)
+				playerCar.Shift(5, 4);
+			else
+				playerCar.engineState = Car::Stalled;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Num5) == true && playerCar.clutch == true)
+		{
+			if (playerCar.rpm >= 5000 && playerCar.currentGear == 4)
+				playerCar.Shift(4, 5);
 			else
 				playerCar.engineState = Car::Stalled;
 		}
 
+		//// Effect of Player's Car Velocity ////
 		limit(playerCar.speed, playerCar.maxSpeed, 0);
 
 		pos += playerCar.speed;
@@ -279,18 +331,50 @@ int main()
 		}
 
 		//// Draw UI ////
-		sf::Text text;
+
+		sf::Text speedometer;
 		sf::Font font;
 		if (!font.loadFromFile("Assets/Fonts/helvetica.ttf"))
 		{
 			// error...
 		}
-		// select the font
-		text.setFont(font);
-		text.setString("Speedometer: " + std::to_string(playerCar.speed));
-		text.setCharacterSize(24);
-		text.setFillColor(Color::Red);
-		app.draw(text);
+		speedometer.setFont(font);
+		speedometer.setString("Speedometer: " + std::to_string(playerCar.speed));
+		speedometer.setCharacterSize(24);
+		speedometer.setFillColor(Color::Red);
+		app.draw(speedometer);
+
+		sf::Text accelerationGauge;
+		accelerationGauge.setFont(font);
+		accelerationGauge.setString("Acceleration: " + std::to_string(playerCar.acceleration) + "/frame");
+		accelerationGauge.setCharacterSize(24);
+		accelerationGauge.setFillColor(Color::Red);
+		accelerationGauge.setPosition(0, 30);
+		app.draw(accelerationGauge);
+
+		sf::Text rpm;
+		rpm.setFont(font);
+		rpm.setString("RPM: " + std::to_string(playerCar.rpm));
+		rpm.setCharacterSize(24);
+		rpm.setFillColor(Color::Red);
+		rpm.setPosition(0, 30);
+		app.draw(rpm);
+
+		sf::Text gear;
+		gear.setFont(font);
+		gear.setString("Gear: " + std::to_string(playerCar.currentGear));
+		gear.setCharacterSize(24);
+		gear.setFillColor(Color::Red);
+		gear.setPosition(0, 60);
+		app.draw(gear);
+
+		sf::Text clutch;
+		clutch.setFont(font);
+		clutch.setString("Clutch: " + std::to_string(playerCar.clutch));
+		clutch.setCharacterSize(24);
+		clutch.setFillColor(Color::Red);
+		clutch.setPosition(0, 90);
+		app.draw(clutch);
 
 		app.display();
 	}

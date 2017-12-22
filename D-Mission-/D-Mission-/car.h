@@ -92,6 +92,26 @@ struct Car
 		acceleration = 0.0;
 		brake = 0.0;
 		suspension = 0.0;
+		clutch = 0.0;
+		angle = 0.0;
+		wheelAngle = 0.0;
+		rpm = 0.0;
+		speed = 0.0;
+		maxSpeed = 650;
+		redline = 7000;
+		fuelAmount = 0.0;
+		horsePower = 0.0;
+		torque = 480;
+		acceleration = 0.0;
+		rpm_dx = 0;
+		brake = 0.0;
+		suspension = 0.0;
+		currentGear = 0;
+		firstGearAcceleration = 25;
+		secondGearAcceleration = 22;
+		thirdGearAcceleration = 15;
+		fourthGearAcceleration = 10;
+		fifthGearAcceleration = 5;
 		SyncCarData();
 		UpdateStats();
 	}
