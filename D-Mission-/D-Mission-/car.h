@@ -13,26 +13,49 @@ struct Car
 		TurnRight
 	};
 
+	enum EngineState
+	{
+		Off,
+		Idle,
+		Stalled,
+		Throttle
+	};
+
 	void SyncCarData();
 	void UpdateStats();
+	void Shift(int from, int to);
 
 	int carId;
 	std::string modelName;
 	int modelId;
 
 	// Dynamic
+	bool clutch;
 	float angle;
 	float wheelAngle;
+	float rpm;
 	float speed;
-	CarState state;
+	CarState carState;
+	EngineState engineState;
 
 	// Semi Dynamic - Stats
+	float maxSpeed;
+	float redline;
 	float fuelAmount;
 	float horsePower;
 	float torque;
 	float acceleration;
+	float rpm_dx;
+	float brake;
 	float suspension;
-	
+	int currentGear;
+
+	float firstGearAcceleration;
+	float secondGearAcceleration;
+	float thirdGearAcceleration;
+	float fourthGearAcceleration;
+	float fifthGearAcceleration;
+
 	// Semi Dynamic - Physical Parts
 	int liveryId;
 	int colorId;
@@ -59,9 +82,16 @@ struct Car
 
 	Car()
 	{
-		state = Neutral;
+		carState = Neutral;
 		x = 0;
 		y = 0;
+		speed = 0.0;
+		fuelAmount = 0.0;
+		horsePower = 0.0;
+		torque = 0.0;
+		acceleration = 0.0;
+		brake = 0.0;
+		suspension = 0.0;
 		SyncCarData();
 		UpdateStats();
 	}

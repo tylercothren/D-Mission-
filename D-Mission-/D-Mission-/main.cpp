@@ -12,15 +12,33 @@ void project(Line &l, int camX, int camY, int camZ);
 int width = 1024;
 int height = 768;
 int roadW = 2000;
-int segL = 200; //segment length
-float camD = 0.84; //camera depth
+int segmentLength = 200;
 int viewDistance = 300;
+int maxFPS = 60;
+
+float leftRoadBound = -1;
+float rightRoadBound = 1;
+float decel = -5;
+float step = 1/maxFPS;
+float cameraDepth = 0.84;
 float horizonLine = height / 2;
 float centerLine = width / 2;
-float maxZ = viewDistance * segL;
+float maxZ = viewDistance * segmentLength;
+
 std::vector<sf::Sprite> objects;
 
 
+/// <summary>
+/// Draws the quad.
+/// </summary>
+/// <param name="w">The w.</param>
+/// <param name="c">The c.</param>
+/// <param name="x1">The x1.</param>
+/// <param name="y1">The y1.</param>
+/// <param name="w1">The w1.</param>
+/// <param name="x2">The x2.</param>
+/// <param name="y2">The y2.</param>
+/// <param name="w2">The w2.</param>
 void drawQuad(RenderWindow &w, Color c, int x1, int y1, int w1, int x2, int y2, int w2)
 {
 	ConvexShape shape(4);
@@ -32,18 +50,43 @@ void drawQuad(RenderWindow &w, Color c, int x1, int y1, int w1, int x2, int y2, 
 	w.draw(shape);
 }
 
+/// <summary>
+/// Projects the specified l.
+/// </summary>
+/// <param name="l">The l.</param>
+/// <param name="camX">The cam x.</param>
+/// <param name="camY">The cam y.</param>
+/// <param name="camZ">The cam z.</param>
 void project(Line &l, int camX, int camY, int camZ)
 {
-	l.scale = camD / (l.z - camZ);
+	l.scale = cameraDepth / (l.z - camZ);
 	l.X = (1 + l.scale*(l.x - camX)) * width / 2;
 	l.Y = (1 - l.scale*(l.y - camY)) * height / 2;
 	l.W = l.scale * roadW  * width / 2;
 }
 
+float accelerate(float vi, float a, float t)
+{
+	float vf = vi + (a * t);
+	return vf;
+}
+
+void limit(float &x, float upperBound, float lowerBound) 
+{
+	if (x > upperBound)
+		x = upperBound;
+	else if (x < lowerBound)
+		x = lowerBound;
+}
+
+/// <summary>
+/// Entry point.
+/// </summary>
+/// <returns></returns>
 int main()
 {
 	RenderWindow app(VideoMode(width, height), "D-Mission!");
-	app.setFramerateLimit(60);
+	app.setFramerateLimit(maxFPS);
 
 	Texture textures[5];
 
@@ -76,12 +119,12 @@ int main()
 
 	std::vector<Line> lines;
 
-	Car car = Car();
+	Car playerCar = Car();
 
 	for (int i = 0; i<1600; i++)
 	{
 		Line line;
-		line.z = i*segL;
+		line.z = i*segmentLength;
 
 		//// Curve Example at Track Position
 		if (i > 300 && i < 700) line.curve = 2;
@@ -108,7 +151,10 @@ int main()
 	float playerX = 0;
 	int pos = 200;
 	int H = 1500;
+	int dt = 0;
+	playerCar.speed = 0.0f;
 
+	//// Game Loop ////
 	while (app.isOpen())
 	{
 		Event e;
@@ -118,36 +164,67 @@ int main()
 				app.close();
 		}
 
-		int speed = 0;
-		car.state = Car::Neutral;
+		//// Reset Car ////
+		playerCar.clutch = false;
+		playerCar.speed = accelerate(playerCar.speed, decel, 1);
+		playerCar.carState = Car::Neutral;
 
+		if (Keyboard::isKeyPressed(Keyboard::Space)) playerCar.clutch = true;
 		if (Keyboard::isKeyPressed(Keyboard::Right)) 
 		{
 			playerX += 0.05;
-			car.state = Car::TurnRight;
+			playerCar.carState = Car::TurnRight;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
 			playerX -= 0.05;
-			car.state = Car::TurnLeft;
+			playerCar.carState = Car::TurnLeft;
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Up)) speed = 200;
-		if (Keyboard::isKeyPressed(Keyboard::Down)) speed = -200;
-		if (Keyboard::isKeyPressed(Keyboard::Tab)) speed *= 3;
-		if (Keyboard::isKeyPressed(Keyboard::W)) H += 100;
-		if (Keyboard::isKeyPressed(Keyboard::S)) H -= 100;
+		if (Keyboard::isKeyPressed(Keyboard::Up))
+		{
+			if (playerCar.clutch == false) // Only Engine Revs when clutch is disengaged
+				playerCar.speed = accelerate(playerCar.speed, playerCar.acceleration, 1);
+			playerCar.rpm += playerCar.rpm_dx;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Down))
+		{
+			playerCar.speed = accelerate(playerCar.speed, playerCar.brake, 1);
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Tab)) playerCar.speed *= 3;
+		if (Keyboard::isKeyPressed(Keyboard::W)) H += 100; // Hax
+		if (Keyboard::isKeyPressed(Keyboard::S)) H -= 100; // Hax
 
-		pos += speed;
-		while (pos >= N*segL) pos -= N*segL;
-		while (pos < 0) pos += N*segL;
+		//// Shifting ////
+		if (Keyboard::isKeyPressed(Keyboard::Q) == true && playerCar.clutch == true)
+		{
+			if (playerCar.rpm >= 1000 && playerCar.currentGear == 1)
+				playerCar.Shift(1, 2);
+			else
+				playerCar.engineState = Car::Stalled;
+		}
+
+		if (Keyboard::isKeyPressed(Keyboard::W) == true && playerCar.clutch == true)
+		{
+			if (playerCar.rpm >= 1000 && playerCar.currentGear == 2)
+				playerCar.Shift(2, 3);
+			else
+				playerCar.engineState = Car::Stalled;
+		}
+
+		limit(playerCar.speed, playerCar.maxSpeed, 0);
+
+		pos += playerCar.speed;
+
+		while (pos >= N*segmentLength) pos -= N*segmentLength;
+		while (pos < 0) pos += N*segmentLength;
 
 		app.clear();
 		app.draw(sBackground);
 
-		int startPos = pos / segL;
+		int startPos = pos / segmentLength;
 		int camH = lines[startPos].y + H;
-		if (speed>0) sBackground.move(-lines[startPos].curve * 2, 0);
-		if (speed<0) sBackground.move(lines[startPos].curve * 2, 0);
+		if (playerCar.speed>0) sBackground.move(-lines[startPos].curve * 2, 0);
+		if (playerCar.speed<0) sBackground.move(lines[startPos].curve * 2, 0);
 
 		int maxy = height;
 		float x = 0, dx = 0;
@@ -156,7 +233,7 @@ int main()
 		for (int n = startPos; n<startPos + 300; n++)
 		{
 			Line &l = lines[n%N];
-			project(l, playerX*roadW - x, camH, startPos*segL - (n >= N ? N*segL : 0));
+			project(l, playerX*roadW - x, camH, startPos*segmentLength - (n >= N ? N*segmentLength : 0));
 			x += dx;
 			dx += l.curve;
 
@@ -182,24 +259,38 @@ int main()
 		}
 
 		//// Draw Car ////
-		if (car.state == Car::TurnRight)
+		if (playerCar.carState == Car::TurnRight)
 		{
 			objects[4].setScale(.3, .3);
 			objects[4].setPosition(centerLine - (objects[3].getTextureRect().width / 2 * .3), horizonLine + 100);
 			app.draw(objects[4]);
 		}
-		else if (car.state == Car::TurnLeft)
+		else if (playerCar.carState == Car::TurnLeft)
 		{
 			objects[3].setScale(.3, .3);
 			objects[3].setPosition(centerLine - (objects[3].getTextureRect().width / 2 * .3), horizonLine + 100);
 			app.draw(objects[3]);
 		}
-		else if(car.state == Car::Neutral)
+		else if(playerCar.carState == Car::Neutral)
 		{
 			objects[2].setScale(.3, .3);
 			objects[2].setPosition(centerLine - (objects[2].getTextureRect().width / 2 * .3), horizonLine + 100);
 			app.draw(objects[2]);
 		}
+
+		//// Draw UI ////
+		sf::Text text;
+		sf::Font font;
+		if (!font.loadFromFile("Assets/Fonts/helvetica.ttf"))
+		{
+			// error...
+		}
+		// select the font
+		text.setFont(font);
+		text.setString("Speedometer: " + std::to_string(playerCar.speed));
+		text.setCharacterSize(24);
+		text.setFillColor(Color::Red);
+		app.draw(text);
 
 		app.display();
 	}
