@@ -18,7 +18,7 @@ int maxFPS = 60;
 
 float leftRoadBound = -1;
 float rightRoadBound = 1;
-float decel = -5;
+float decel = -2;
 float step = 1/maxFPS;
 float cameraDepth = 0.84;
 float horizonLine = height / 2;
@@ -88,13 +88,13 @@ int main()
 	RenderWindow app(VideoMode(width, height), "D-Mission!");
 	app.setFramerateLimit(maxFPS);
 
-	Texture textures[5];
+	Texture textures[10];
 
 	textures[0].loadFromFile("Assets/tree1.png");
 	textures[0].setSmooth(true);
 	objects.push_back(sf::Sprite(textures[0]));
 
-	textures[1].loadFromFile("Assets/house1.png");
+	textures[1].loadFromFile("Assets/house2.png");
 	textures[1].setSmooth(true);
 	objects.push_back(sf::Sprite(textures[1]));
 
@@ -109,6 +109,26 @@ int main()
 	textures[4].loadFromFile("Assets/180sx_turnRight.png");
 	textures[4].setSmooth(true);
 	objects.push_back(sf::Sprite(textures[4]));
+
+	textures[5].loadFromFile("Assets/building1.png");
+	textures[5].setSmooth(true);
+	objects.push_back(sf::Sprite(textures[5]));
+
+	textures[6].loadFromFile("Assets/building2.png");
+	textures[6].setSmooth(true);
+	objects.push_back(sf::Sprite(textures[6]));
+
+	textures[7].loadFromFile("Assets/speedometer.png");
+	textures[7].setSmooth(true);
+	objects.push_back(sf::Sprite(textures[7]));
+
+	textures[8].loadFromFile("Assets/gaugeNeedle.png");
+	textures[8].setSmooth(true);
+	objects.push_back(sf::Sprite(textures[8]));
+
+	textures[9].loadFromFile("Assets/tachometer.png");
+	textures[9].setSmooth(true);
+	objects.push_back(sf::Sprite(textures[9]));
 
 	Texture bg;
 	bg.loadFromFile("Assets/bg.jpg");
@@ -165,28 +185,30 @@ int main()
 		}
 
 		//// Reset Car ////
-		playerCar.clutch = false;
-		playerCar.rpm =- 20;
-		limit(playerCar.rpm, playerCar.redline, 0);
-		playerCar.speed = accelerate(playerCar.speed, decel, 1);
+		playerCar.clutch = false;		
+		playerCar.rpm = accelerate(playerCar.rpm, -50, 1); // RPM's drop when foot is not on pedal.
+		playerCar.updateRPMFloor();
+		limit(playerCar.rpm, playerCar.redline, playerCar.rpmFloor); // RPM's don't drop past a certain point depending on how fast the car is moving/gear transmission is in.
+		limit(playerCar.speed, playerCar.maxSpeed, 0);
+		//if (playerCar.rpm >= playerCar.redline)
+			//playerCar.acceleration = decel * -1;
+		playerCar.speed = accelerate(playerCar.speed, decel, 1); // Natural friction with road and air.
 		playerCar.carState = Car::Neutral;
 
 		if (Keyboard::isKeyPressed(Keyboard::Space)) playerCar.clutch = true;
 		if (Keyboard::isKeyPressed(Keyboard::Right)) 
 		{
-			playerX += 0.05;
+			playerX += 0.05 + (0.5 * (playerCar.speed / playerCar.maxSpeed));
 			playerCar.carState = Car::TurnRight;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			playerX -= 0.05;
+			playerX -= 0.05 + (0.5 * (playerCar.speed / playerCar.maxSpeed));
 			playerCar.carState = Car::TurnLeft;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Up))
 		{
-			playerCar.rpm += playerCar.rpm_dx;
-			if (playerCar.clutch == false) // Only Engine Revs when clutch is disengaged
-				playerCar.speed = accelerate(playerCar.speed, playerCar.acceleration, 1);
+			playerCar.gasPedalDown();
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Down))
 		{
@@ -198,74 +220,74 @@ int main()
 		if (Keyboard::isKeyPressed(Keyboard::E))
 		{
 			if (playerCar.currentGear == 0)
-				playerCar.Shift(0, 0);
+				playerCar.Shift(0);
 			else if (playerCar.currentGear == 1)
-				playerCar.Shift(1, 0);
+				playerCar.Shift(0);
 			else if (playerCar.currentGear == 2)
-				playerCar.Shift(2, 0);
+				playerCar.Shift(0);
 			else if (playerCar.currentGear == 3)
-				playerCar.Shift(3, 0);
+				playerCar.Shift(0);
 			else if (playerCar.currentGear == 4)
-				playerCar.Shift(4, 0);
+				playerCar.Shift(0);
 			else if (playerCar.currentGear == 5)
-				playerCar.Shift(5, 0);
+				playerCar.Shift(0);
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Num1) == true && playerCar.clutch == true)
 		{
-			if (playerCar.currentGear == 0)
-				playerCar.Shift(0, 1);
+			if (playerCar.rpm >= 1000 && playerCar.currentGear == 0)
+				playerCar.Shift(1);
 			else if(playerCar.currentGear == 2)
-				playerCar.Shift(2, 1);
+				playerCar.Shift(1);
 			else if (playerCar.currentGear == 3)
-				playerCar.Shift(3, 1);
+				playerCar.Shift(1);
 			else
 				playerCar.engineState = Car::Stalled;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Num2) == true && playerCar.clutch == true)
 		{
 			if (playerCar.rpm >= 1000 && playerCar.currentGear == 1)
-				playerCar.Shift(1, 2);
+				playerCar.Shift(2);
 			else if (playerCar.currentGear == 3)
-				playerCar.Shift(3, 2);
+				playerCar.Shift(2);
 			else if (playerCar.rpm >= 2000 && playerCar.currentGear == 0)
-				playerCar.Shift(0, 2);
+				playerCar.Shift(2);
 			else
 				playerCar.engineState = Car::Stalled;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Num3) == true && playerCar.clutch == true)
 		{
 			if (playerCar.rpm >= 2000 && playerCar.currentGear == 2)
-				playerCar.Shift(2, 3);
+				playerCar.Shift(3);
 			else if (playerCar.rpm >= 3000 && playerCar.currentGear == 0)
-				playerCar.Shift(0, 3);
+				playerCar.Shift(3);
 			else if (playerCar.rpm >= 2000 && playerCar.currentGear == 1)
-				playerCar.Shift(1, 3);
+				playerCar.Shift(3);
 			else if (playerCar.currentGear == 4)
-				playerCar.Shift(4, 3);
+				playerCar.Shift(3);
 			else
 				playerCar.engineState = Car::Stalled;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Num4) == true && playerCar.clutch == true)
 		{
 			if (playerCar.rpm >= 5000 && playerCar.currentGear == 3)
-				playerCar.Shift(3, 4);
+				playerCar.Shift(4);
 			else if (playerCar.currentGear == 5)
-				playerCar.Shift(5, 4);
+				playerCar.Shift(4);
 			else
 				playerCar.engineState = Car::Stalled;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Num5) == true && playerCar.clutch == true)
 		{
 			if (playerCar.rpm >= 5000 && playerCar.currentGear == 4)
-				playerCar.Shift(4, 5);
+				playerCar.Shift(5);
 			else
 				playerCar.engineState = Car::Stalled;
 		}
 
 		//// Effect of Player's Car Velocity ////
-		limit(playerCar.speed, playerCar.maxSpeed, 0);
+		limit(playerCar.speed, 1000000, 0);
 
-		pos += playerCar.speed;
+		pos += playerCar.speed * 7;
 
 		while (pos >= N*segmentLength) pos -= N*segmentLength;
 		while (pos < 0) pos += N*segmentLength;
@@ -280,6 +302,7 @@ int main()
 
 		int maxy = height;
 		float x = 0, dx = 0;
+
 
 		//// Draw Road from Screen to Horizon Line ////
 		for (int n = startPos; n<startPos + 300; n++)
@@ -331,6 +354,17 @@ int main()
 		}
 
 		//// Draw UI ////
+		
+		//Speedometer
+		objects[7].setScale(.5, .5);
+		objects[7].setPosition(20, (horizonLine*2) - 135);
+		app.draw(objects[7]);
+
+		objects[8].setScale(.5, .5); 
+		objects[8].setOrigin(180, 141);
+		objects[8].setPosition(111, (horizonLine * 2) - 55);
+		objects[8].setRotation(-110 + (210 * (playerCar.speed/ playerCar.maxSpeed)));
+		app.draw(objects[8]);
 
 		sf::Text speedometer;
 		sf::Font font;
@@ -339,8 +373,12 @@ int main()
 			// error...
 		}
 		speedometer.setFont(font);
-		speedometer.setString("Speedometer: " + std::to_string(playerCar.speed));
-		speedometer.setCharacterSize(24);
+		std::string str = std::to_string(playerCar.speed);
+		str.erase(str.find_last_not_of('0') + 1, std::string::npos);
+		str.erase(str.find_last_not_of('.') + 1, std::string::npos);
+		speedometer.setString(str);
+		speedometer.setCharacterSize(20);
+		speedometer.setPosition(105, (horizonLine * 2) - 30);
 		speedometer.setFillColor(Color::Red);
 		app.draw(speedometer);
 
@@ -352,12 +390,16 @@ int main()
 		accelerationGauge.setPosition(0, 30);
 		app.draw(accelerationGauge);
 
+		//Tachometer
+		objects[9].setScale(.15, .15);
+		objects[9].setPosition(190, (horizonLine * 2) - 150);
+		app.draw(objects[9]);
 		sf::Text rpm;
 		rpm.setFont(font);
 		rpm.setString("RPM: " + std::to_string(playerCar.rpm));
 		rpm.setCharacterSize(24);
 		rpm.setFillColor(Color::Red);
-		rpm.setPosition(0, 30);
+		rpm.setPosition(0, 60);
 		app.draw(rpm);
 
 		sf::Text gear;
@@ -365,7 +407,7 @@ int main()
 		gear.setString("Gear: " + std::to_string(playerCar.currentGear));
 		gear.setCharacterSize(24);
 		gear.setFillColor(Color::Red);
-		gear.setPosition(0, 60);
+		gear.setPosition(0, 90);
 		app.draw(gear);
 
 		sf::Text clutch;
@@ -373,8 +415,16 @@ int main()
 		clutch.setString("Clutch: " + std::to_string(playerCar.clutch));
 		clutch.setCharacterSize(24);
 		clutch.setFillColor(Color::Red);
-		clutch.setPosition(0, 90);
+		clutch.setPosition(0, 120);
 		app.draw(clutch);
+
+		sf::Text engineState;
+		engineState.setFont(font);
+		engineState.setString("Engine: " + std::to_string(playerCar.engineState));
+		engineState.setCharacterSize(24);
+		engineState.setFillColor(Color::Red);
+		engineState.setPosition(0, 150);
+		app.draw(engineState);
 
 		app.display();
 	}

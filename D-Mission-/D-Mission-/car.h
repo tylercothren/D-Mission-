@@ -23,7 +23,11 @@ struct Car
 
 	void SyncCarData();
 	void UpdateStats();
-	void Shift(int from, int to);
+	void updateRPMFloor();
+	void gasPedalDown();
+	void brakePedalDown();
+	void clutchPedalDown();
+	void Shift(int to);
 
 	int carId;
 	std::string modelName;
@@ -34,6 +38,8 @@ struct Car
 	float angle;
 	float wheelAngle;
 	float rpm;
+	float rpm_dx;
+	float rpmFloor;
 	float speed;
 	CarState carState;
 	EngineState engineState;
@@ -45,16 +51,22 @@ struct Car
 	float horsePower;
 	float torque;
 	float acceleration;
-	float rpm_dx;
 	float brake;
 	float suspension;
 	int currentGear;
 
+	// Transmission Stats
+	float engineRpm_dx;
 	float firstGearAcceleration;
+	float firstGearRpm_dx;
 	float secondGearAcceleration;
+	float secondGearRpm_dx;
 	float thirdGearAcceleration;
+	float thirdGearRpm_dx;
 	float fourthGearAcceleration;
+	float fourthGearRpm_dx;
 	float fifthGearAcceleration;
+	float fifthGearRpm_dx;
 
 	// Semi Dynamic - Physical Parts
 	int liveryId;
@@ -88,7 +100,7 @@ struct Car
 		speed = 0.0;
 		fuelAmount = 0.0;
 		horsePower = 0.0;
-		torque = 0.0;
+		torque = 480.0;
 		acceleration = 0.0;
 		brake = 0.0;
 		suspension = 0.0;
@@ -96,22 +108,29 @@ struct Car
 		angle = 0.0;
 		wheelAngle = 0.0;
 		rpm = 0.0;
+		rpmFloor = 3000;
 		speed = 0.0;
-		maxSpeed = 650;
+		maxSpeed = 260;
 		redline = 7000;
 		fuelAmount = 0.0;
 		horsePower = 0.0;
 		torque = 480;
 		acceleration = 0.0;
-		rpm_dx = 0;
+		firstGearAcceleration = 2 + 1;
+		secondGearAcceleration = 2 + .8;
+		thirdGearAcceleration = 2 + .6;
+		fourthGearAcceleration = 2 + .5;
+		fifthGearAcceleration = 2 + .3;
+		engineRpm_dx = torque * 1.5;
+		firstGearRpm_dx = torque * .50;
+		secondGearRpm_dx = torque * .25;
+		thirdGearRpm_dx = torque * .125;
+		fourthGearRpm_dx = torque * .1;
+		fifthGearRpm_dx = torque * .05;
+		rpm_dx = engineRpm_dx;
 		brake = 0.0;
 		suspension = 0.0;
-		currentGear = 0;
-		firstGearAcceleration = 25;
-		secondGearAcceleration = 22;
-		thirdGearAcceleration = 15;
-		fourthGearAcceleration = 10;
-		fifthGearAcceleration = 5;
+		currentGear = 0;		
 		SyncCarData();
 		UpdateStats();
 	}

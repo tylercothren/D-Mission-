@@ -10,113 +10,68 @@ void Car::UpdateStats()
 	// Formula for horsePower, torque, acceleration, suspention based on data.
 }
 
+void Car::updateRPMFloor()
+{
+	rpmFloor = 1000; //idle for now?
+}
+
+void Car::gasPedalDown()
+{
+	rpm += rpm_dx;
+	if (clutch == false) // Only Engine Revs when clutch is disengaged
+		speed += acceleration;
+}
+
+void Car::brakePedalDown()
+{
+
+}
+
+void Car::clutchPedalDown()
+{
+
+}
+
 /// <summary>
 /// Results of shifting the car.
 /// </summary>
-/// <param name="from">From.</param>
 /// <param name="to">To.</param>
-void Car::Shift(int from, int to)
+void Car::Shift(int to)
 {
-	if (from == 0 && to == 1)
-	{
-		currentGear = 1;
-		acceleration = firstGearAcceleration;
-		rpm_dx = torque;
-	}
-	else if (from == 0 && to == 2)
-	{
-		currentGear = 2;
-		acceleration = secondGearAcceleration;
-		rpm_dx = torque * .85;
-	}
-	else if (from == 0 && to == 3)
-	{
-		currentGear = 3;
-		acceleration = thirdGearAcceleration;
-		rpm_dx = torque * .5;
-	}
-	else if (from == 1 && to == 0)
+	if (to == 0)
 	{
 		currentGear = 0;
 		acceleration = 0;
+		rpm_dx = engineRpm_dx;
 	}
-	else if (from == 1 && to == 2)
-	{
-		currentGear = 2;
-		acceleration = secondGearAcceleration;
-		rpm_dx = torque * .85;
-	}
-	else if (from == 1 && to == 3)
-	{
-		currentGear = 3;
-		acceleration = thirdGearAcceleration;
-		rpm_dx = torque * .5;
-	}
-	else if (from == 2 && to == 0)
-	{
-		currentGear = 0;
-		acceleration = 0;
-	}
-	else if (from == 2 && to == 1)
+	else if (to == 1)
 	{
 		currentGear = 1;
 		acceleration = firstGearAcceleration;
-		rpm_dx = torque;
+		rpm_dx = firstGearRpm_dx;
 	}
-	else if (from == 2 && to == 3)
-	{
-		currentGear = 3;
-		acceleration = thirdGearAcceleration;
-		rpm_dx = torque * .5;
-	}
-	else if (from == 3 && to == 0)
-	{
-		currentGear = 0;
-		acceleration = 0;
-	}
-	else if (from == 3 && to == 1)
-	{
-		currentGear = 1;
-		acceleration = firstGearAcceleration;
-		rpm_dx = torque;
-	}
-	else if (from == 3 && to == 2)
+	else if (to == 2)
 	{
 		currentGear = 2;
 		acceleration = secondGearAcceleration;
-		rpm_dx = torque * .85;
+		rpm_dx = secondGearRpm_dx;
 	}
-	else if (from == 3 && to == 4)
+	else if (to == 3)
+	{
+		currentGear = 3;
+		acceleration = thirdGearAcceleration;
+		rpm_dx = thirdGearRpm_dx;
+	}
+	else if (to == 4)
 	{
 		currentGear = 4;
 		acceleration = fourthGearAcceleration;
-		rpm_dx = torque * .25;
+		rpm_dx = fourthGearRpm_dx;
 	}
-	else if (from == 4 && to == 0)
+	else if (to == 5)
 	{
-		currentGear = 0;
-		acceleration = 0;
-	}
-	else if (from == 4 && to == 3)
-	{
-		currentGear = 3;
-		acceleration = thirdGearAcceleration;
-		rpm_dx = torque * .5;
-	}
-	else if (from == 4 && to == 5)
-	{
+		currentGear = 5;
 		acceleration = fifthGearAcceleration;
-		rpm_dx = torque * .125;
-	}
-	else if (from == 5 && to == 4)
-	{
-		currentGear = 4;
-		acceleration = fourthGearAcceleration;
-		rpm_dx = torque * .25;
-	}
-	else if (from == 5 && to == 0)
-	{
-		currentGear = 0;
-		acceleration = 0;
+		rpm_dx = fifthGearRpm_dx;
 	}
 }
