@@ -18,7 +18,7 @@ int maxFPS = 60;
 
 float leftRoadBound = -1;
 float rightRoadBound = 1;
-float decel = -2;
+float decel = -1;
 float step = 1/maxFPS;
 float cameraDepth = 0.84;
 float horizonLine = height / 2;
@@ -88,7 +88,7 @@ int main()
 	RenderWindow app(VideoMode(width, height), "D-Mission!");
 	app.setFramerateLimit(maxFPS);
 
-	Texture textures[10];
+	Texture textures[11];
 
 	textures[0].loadFromFile("Assets/tree1.png");
 	textures[0].setSmooth(true);
@@ -130,6 +130,10 @@ int main()
 	textures[9].setSmooth(true);
 	objects.push_back(sf::Sprite(textures[9]));
 
+	textures[10].loadFromFile("Assets/tachometerNeedle.png");
+	textures[10].setSmooth(true);
+	objects.push_back(sf::Sprite(textures[10]));
+
 	Texture bg;
 	bg.loadFromFile("Assets/bg.jpg");
 	bg.setRepeated(true);
@@ -164,6 +168,16 @@ int main()
 			line.spriteX = 3.2; line.sprite = objects[1];
 		}
 
+		if (i % 160 == 0)
+		{
+			line.spriteX = -3; line.sprite = objects[5];
+		}
+
+		if (i % 93 == 0)
+		{
+			line.spriteX = 4; line.sprite = objects[6];
+		}
+
 		lines.push_back(line);
 	}
 
@@ -184,19 +198,19 @@ int main()
 				app.close();
 		}
 
-		//// Reset Car ////
+		//// Reset Car (Effect of World on Car) ////
 		playerCar.clutch = false;		
-		playerCar.rpm = accelerate(playerCar.rpm, -50, 1); // RPM's drop when foot is not on pedal.
-		playerCar.updateRPMFloor();
-		limit(playerCar.rpm, playerCar.redline, playerCar.rpmFloor); // RPM's don't drop past a certain point depending on how fast the car is moving/gear transmission is in.
-		limit(playerCar.speed, playerCar.maxSpeed, 0);
-		//if (playerCar.rpm >= playerCar.redline)
-			//playerCar.acceleration = decel * -1;
+		playerCar.rpm = accelerate(playerCar.rpm, -70, 1); // RPM's drop when foot is not on pedal.
+		playerCar.updateRPMFloor(); //This might be uneccessary
+		limit(playerCar.rpm, playerCar.redline, playerCar.rpmFloor + (playerCar.speed * 10)); // RPM's don't drop past a certain point depending on how fast the car is moving/gear transmission is in.
+		limit(playerCar.speed, playerCar.maxSpeed, 0); 
+		if (playerCar.rpm >= playerCar.redline + 100)
+			playerCar.rpm -= 500;
 		playerCar.speed = accelerate(playerCar.speed, decel, 1); // Natural friction with road and air.
 		playerCar.carState = Car::Neutral;
 
 		if (Keyboard::isKeyPressed(Keyboard::Space)) playerCar.clutch = true;
-		if (Keyboard::isKeyPressed(Keyboard::Right)) 
+		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
 			playerX += 0.05 + (0.5 * (playerCar.speed / playerCar.maxSpeed));
 			playerCar.carState = Car::TurnRight;
@@ -357,12 +371,12 @@ int main()
 		
 		//Speedometer
 		objects[7].setScale(.5, .5);
-		objects[7].setPosition(20, (horizonLine*2) - 135);
+		objects[7].setPosition(20, (horizonLine*2) - 140);
 		app.draw(objects[7]);
 
 		objects[8].setScale(.5, .5); 
 		objects[8].setOrigin(180, 141);
-		objects[8].setPosition(111, (horizonLine * 2) - 55);
+		objects[8].setPosition(111, (horizonLine * 2) - 60);
 		objects[8].setRotation(-110 + (210 * (playerCar.speed/ playerCar.maxSpeed)));
 		app.draw(objects[8]);
 
@@ -373,13 +387,11 @@ int main()
 			// error...
 		}
 		speedometer.setFont(font);
-		std::string str = std::to_string(playerCar.speed);
-		str.erase(str.find_last_not_of('0') + 1, std::string::npos);
-		str.erase(str.find_last_not_of('.') + 1, std::string::npos);
+		std::string str = std::to_string((int) playerCar.speed);
 		speedometer.setString(str);
-		speedometer.setCharacterSize(20);
-		speedometer.setPosition(105, (horizonLine * 2) - 30);
-		speedometer.setFillColor(Color::Red);
+		speedometer.setCharacterSize(22);
+		speedometer.setPosition(87, (horizonLine * 2) - 35);
+		speedometer.setFillColor(Color::Yellow);
 		app.draw(speedometer);
 
 		sf::Text accelerationGauge;
@@ -394,6 +406,11 @@ int main()
 		objects[9].setScale(.15, .15);
 		objects[9].setPosition(190, (horizonLine * 2) - 150);
 		app.draw(objects[9]);
+		objects[10].setScale(.15, .15);
+		objects[10].setOrigin(512, 512);
+		objects[10].setPosition(265, horizonLine + 310);
+		objects[10].setRotation(-5 + (160 * (playerCar.rpm / playerCar.redline)));
+		app.draw(objects[10]);
 		sf::Text rpm;
 		rpm.setFont(font);
 		rpm.setString("RPM: " + std::to_string(playerCar.rpm));
