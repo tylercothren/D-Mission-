@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <string>
 #include <iostream>
 #include "car.h"
@@ -138,8 +139,15 @@ int main()
 	bg.loadFromFile("Assets/bg.jpg");
 	bg.setRepeated(true);
 	Sprite sBackground(bg);
-	sBackground.setTextureRect(IntRect(0, 0, 5000, 411));
-	sBackground.setPosition(-2000, 0);
+	sBackground.setScale(.8,.8);
+	sBackground.setTextureRect(IntRect(0, 0, 5120, 512));
+	sBackground.setPosition(0, 0);
+
+	sf::SoundBuffer carRevUpBuffer;
+	if (!carRevUpBuffer.loadFromFile("Assets/180sx_rev_up_11.wav"))
+		return -1;
+	sf::Sound carRevUp;
+	carRevUp.setBuffer(carRevUpBuffer);
 
 	std::vector<Line> lines;
 
@@ -152,6 +160,9 @@ int main()
 
 		//// Curve Example at Track Position
 		if (i > 300 && i < 700) line.curve = 2;
+
+		//// Curve Example at Track Position
+		if (i > 800 && i < 1200) line.curve = 1.5;
 
 		//// Elevation Change Example
 		if (i > 750) line.y = sin(i / 30.0) * 1500;
@@ -199,25 +210,40 @@ int main()
 		}
 
 		//// Reset Car (Effect of World on Car) ////
-		playerCar.clutch = false;		
-		playerCar.rpm = accelerate(playerCar.rpm, -70, 1); // RPM's drop when foot is not on pedal.
-		playerCar.updateRPMFloor(); //This might be uneccessary
-		limit(playerCar.rpm, playerCar.redline, playerCar.rpmFloor + (playerCar.speed * 10)); // RPM's don't drop past a certain point depending on how fast the car is moving/gear transmission is in.
-		limit(playerCar.speed, playerCar.maxSpeed, 0); 
-		if (playerCar.rpm >= playerCar.redline + 100)
-			playerCar.rpm -= 500;
-		playerCar.speed = accelerate(playerCar.speed, decel, 1); // Natural friction with road and air.
+		/*if (lines[pos].curve >= 0 && playerCar.speed > 0)
+			playerX += .01;
+		else if (lines[pos].curve <= 0 && playerCar.speed > 0)
+			playerX -= .01;*/
+
+		playerCar.clutch = false;
+
+		carRevUp.stop();
+		
+		playerCar.rpm = accelerate(playerCar.rpm, -90, 1); // RPM's drop when foot is not on pedal.
+		
+		playerCar.updateRPMFloor(); // This might be uneccessary
+		
+		limit(playerCar.rpm, playerCar.redline, playerCar.rpmFloor + (playerCar.speed * 20)); // RPM's don't drop past a certain point depending on how fast the car is moving/gear transmission is in.
+		
+		limit(playerCar.speed, playerCar.maxSpeed, 0);
+
+		if (playerCar.rpm >= playerCar.redline)
+			playerCar.rpm -= 400;
+
+		if (playerCar.speed > 0)
+			playerCar.speed = accelerate(playerCar.speed, decel, 1); // Natural friction with road and air.
+
 		playerCar.carState = Car::Neutral;
 
 		if (Keyboard::isKeyPressed(Keyboard::Space)) playerCar.clutch = true;
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
-			playerX += 0.05 + (0.5 * (playerCar.speed / playerCar.maxSpeed));
+			playerX += 0.05 + (0.3 * (playerCar.speed / playerCar.maxSpeed));
 			playerCar.carState = Car::TurnRight;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			playerX -= 0.05 + (0.5 * (playerCar.speed / playerCar.maxSpeed));
+			playerX -= 0.05 + (0.3 * (playerCar.speed / playerCar.maxSpeed));
 			playerCar.carState = Car::TurnLeft;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Up))
@@ -226,7 +252,7 @@ int main()
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Down))
 		{
-			playerCar.speed = accelerate(playerCar.speed, playerCar.brake, 1);
+			playerCar.speed = accelerate(playerCar.speed, playerCar.brake, 4);
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Tab)) playerCar.speed *= 3;
 		if (Keyboard::isKeyPressed(Keyboard::W)) H += 100; // Hax
@@ -299,8 +325,6 @@ int main()
 		}
 
 		//// Effect of Player's Car Velocity ////
-		limit(playerCar.speed, 1000000, 0);
-
 		pos += playerCar.speed * 7;
 
 		while (pos >= N*segmentLength) pos -= N*segmentLength;
@@ -311,12 +335,17 @@ int main()
 
 		int startPos = pos / segmentLength;
 		int camH = lines[startPos].y + H;
-		if (playerCar.speed>0) sBackground.move(-lines[startPos].curve * 2, 0);
-		if (playerCar.speed<0) sBackground.move(lines[startPos].curve * 2, 0);
+		if (playerCar.speed>0) sBackground.move(-lines[startPos].curve * 3, 0);
+		if (playerCar.speed<0) sBackground.move(lines[startPos].curve * 3, 0);
 
 		int maxy = height;
 		float x = 0, dx = 0;
 
+		//// Sound ////
+
+		float revUpOffset = 11 * (playerCar.rpm / (playerCar.redline + 300));
+		carRevUp.setPlayingOffset(sf::seconds(revUpOffset));
+		carRevUp.play();
 
 		//// Draw Road from Screen to Horizon Line ////
 		for (int n = startPos; n<startPos + 300; n++)
@@ -409,7 +438,7 @@ int main()
 		objects[10].setScale(.15, .15);
 		objects[10].setOrigin(512, 512);
 		objects[10].setPosition(265, horizonLine + 310);
-		objects[10].setRotation(-5 + (160 * (playerCar.rpm / playerCar.redline)));
+		objects[10].setRotation(-5 + (180 * (playerCar.rpm / playerCar.redline)));
 		app.draw(objects[10]);
 		sf::Text rpm;
 		rpm.setFont(font);
@@ -421,27 +450,20 @@ int main()
 
 		sf::Text gear;
 		gear.setFont(font);
-		gear.setString("Gear: " + std::to_string(playerCar.currentGear));
-		gear.setCharacterSize(24);
+		gear.setString(std::to_string(playerCar.currentGear));
+		gear.setCharacterSize(20);
 		gear.setFillColor(Color::Red);
-		gear.setPosition(0, 90);
+		gear.setPosition(148, (horizonLine * 2) - 30);
 		app.draw(gear);
 
 		sf::Text clutch;
 		clutch.setFont(font);
-		clutch.setString("Clutch: " + std::to_string(playerCar.clutch));
-		clutch.setCharacterSize(24);
+		clutch.setString("X");
+		clutch.setCharacterSize(15);
 		clutch.setFillColor(Color::Red);
-		clutch.setPosition(0, 120);
-		app.draw(clutch);
-
-		sf::Text engineState;
-		engineState.setFont(font);
-		engineState.setString("Engine: " + std::to_string(playerCar.engineState));
-		engineState.setCharacterSize(24);
-		engineState.setFillColor(Color::Red);
-		engineState.setPosition(0, 150);
-		app.draw(engineState);
+		clutch.setPosition(167, (horizonLine * 2) - 33);
+		if (playerCar.clutch == 1)
+			app.draw(clutch);
 
 		app.display();
 	}

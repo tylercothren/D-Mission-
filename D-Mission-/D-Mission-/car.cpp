@@ -19,7 +19,7 @@ void Car::gasPedalDown()
 {
 	rpm += rpm_dx;
 	if (clutch == false) // Only Engine Revs when clutch is disengaged
-		if (rpm <= redline + 100) // Cant Accelerate if engine is not turning faster
+		if (rpm <= redline - 300) // Cant Accelerate if engine is not turning faster
 			speed += acceleration;
 		else
 			speed += 1;

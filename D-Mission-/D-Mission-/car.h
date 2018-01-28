@@ -123,10 +123,10 @@ struct Car
 		fifthGearAcceleration = 1 + .3;
 		engineRpm_dx = torque * 1;
 		firstGearRpm_dx = torque * .25;
-		secondGearRpm_dx = torque * .21;
-		thirdGearRpm_dx = torque * .18;
-		fourthGearRpm_dx = torque * .15;
-		fifthGearRpm_dx = torque * .12;
+		secondGearRpm_dx = torque * .23;
+		thirdGearRpm_dx = torque * .21;
+		fourthGearRpm_dx = torque * .19;
+		fifthGearRpm_dx = torque * .17;
 		rpm_dx = engineRpm_dx;
 		brake = 0.0;
 		suspension = 0.0;
