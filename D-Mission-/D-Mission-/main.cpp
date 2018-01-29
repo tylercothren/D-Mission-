@@ -210,11 +210,6 @@ int main()
 		}
 
 		//// Reset Car (Effect of World on Car) ////
-		/*if (lines[pos].curve >= 0 && playerCar.speed > 0)
-			playerX += .01;
-		else if (lines[pos].curve <= 0 && playerCar.speed > 0)
-			playerX -= .01;*/
-
 		playerCar.clutch = false;
 
 		carRevUp.stop();
@@ -238,12 +233,12 @@ int main()
 		if (Keyboard::isKeyPressed(Keyboard::Space)) playerCar.clutch = true;
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
-			playerX += 0.05 + (0.3 * (playerCar.speed / playerCar.maxSpeed));
+			playerX += 0.1;
 			playerCar.carState = Car::TurnRight;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			playerX -= 0.05 + (0.3 * (playerCar.speed / playerCar.maxSpeed));
+			playerX -= 0.1;
 			playerCar.carState = Car::TurnLeft;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Up))
@@ -325,7 +320,7 @@ int main()
 		}
 
 		//// Effect of Player's Car Velocity ////
-		pos += playerCar.speed * 7;
+		pos += playerCar.speed * 5;
 
 		while (pos >= N*segmentLength) pos -= N*segmentLength;
 		while (pos < 0) pos += N*segmentLength;
@@ -340,6 +335,11 @@ int main()
 
 		int maxy = height;
 		float x = 0, dx = 0;
+
+		//// Tangent force ////
+
+		if (lines[startPos].curve != 0 && playerCar.speed > 5)
+			playerX -= (lines[startPos].curve / 30) + (playerCar.speed / 4000);
 
 		//// Sound ////
 
